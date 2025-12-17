@@ -1,8 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, HelpCircle } from 'lucide-react';
+
+// よくある質問とその回答
+const faqData = [
+  {
+    id: 1,
+    question: '月額料金に含まれるものは？',
+    answer: '月額料金には、車両代、自動車税、自賠責保険、車検費用、メンテナンス費用が含まれています。ガソリン代と任意保険は別途ご負担いただきます。',
+  },
+  {
+    id: 2,
+    question: '契約期間の途中で解約できる？',
+    answer: '契約期間中の途中解約も可能です。ただし、残りの契約期間に応じた中途解約金が発生します。詳しくは契約書の「中途解約」の項目をご確認ください。',
+  },
+  {
+    id: 3,
+    question: '車の乗り換えはできますか？',
+    answer: 'はい、可能です！AI査定機能で現在の車両の市場価値をチェックし、お得なタイミングで乗り換えをご提案しています。ダッシュボードの「査定詳細」からご確認いただけます。',
+  },
+  {
+    id: 4,
+    question: '事故を起こした場合は？',
+    answer: 'まずは警察に届け出の上、NORELサポートセンター（0120-XXX-XXX）にご連絡ください。任意保険に加入されている場合は、保険会社への連絡もお忘れなく。',
+  },
+  {
+    id: 5,
+    question: '引き落とし日を変更したい',
+    answer: '引き落とし日は毎月5日で固定となっております。変更をご希望の場合は、サポートセンターまでお問い合わせください。',
+  },
+  {
+    id: 6,
+    question: '走行距離に制限はある？',
+    answer: '月間走行距離は2,000kmまでとなっています。超過した場合は1kmあたり10円の追加料金が発生します。長距離利用が多い方向けのプランもございます。',
+  },
+];
 
 export default function AIConcierge() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,11 +45,41 @@ export default function AIConcierge() {
   >([
     {
       id: 1,
-      text: 'こんにちは！NOREL AIコンシェルジュです。ご質問があればお気軽にどうぞ。',
+      text: 'こんにちは！NOREL AIコンシェルジュです。下のよくある質問をタップするか、お気軽にメッセージをお送りください。',
       isUser: false,
     },
   ]);
   const [inputText, setInputText] = useState('');
+  const [showFaq, setShowFaq] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto scroll to bottom when new message arrives
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleFaqClick = (faq: typeof faqData[0]) => {
+    // Add user's question
+    const userMessage = {
+      id: messages.length + 1,
+      text: faq.question,
+      isUser: true,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setShowFaq(false);
+
+    // Add AI's answer after a short delay
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: faq.answer,
+          isUser: false,
+        },
+      ]);
+    }, 500);
+  };
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -28,6 +92,7 @@ export default function AIConcierge() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputText('');
+    setShowFaq(false);
 
     // Mock AI response
     setTimeout(() => {
@@ -129,10 +194,39 @@ export default function AIConcierge() {
                           : 'bg-white text-gray-800 rounded-bl-md shadow-sm'
                       }`}
                     >
-                      <p className="text-sm">{message.text}</p>
+                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                     </div>
                   </motion.div>
                 ))}
+
+                {/* FAQ Suggestions */}
+                {showFaq && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-2">
+                      <HelpCircle className="w-4 h-4" />
+                      <span>よくある質問</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {faqData.map((faq) => (
+                        <motion.button
+                          key={faq.id}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleFaqClick(faq)}
+                          className="px-3 py-2 bg-white border border-norel-green text-norel-green text-xs rounded-full hover:bg-norel-green-light transition-colors shadow-sm"
+                        >
+                          {faq.question}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
