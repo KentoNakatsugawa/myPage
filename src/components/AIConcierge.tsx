@@ -125,7 +125,7 @@ export default function AIConcierge() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.5 }}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-norel-green rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-norel-green-dark transition-colors"
+        className="fixed bottom-24 right-6 w-14 h-14 bg-norel-green rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-norel-green-dark transition-colors"
       >
         <MessageCircle className="w-6 h-6 text-white" />
       </motion.button>
@@ -135,7 +135,7 @@ export default function AIConcierge() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.7 }}
-        className="fixed bottom-8 right-24 bg-white px-3 py-1 rounded-full shadow-md z-40 pointer-events-none"
+        className="fixed bottom-[104px] right-24 bg-white px-3 py-1 rounded-full shadow-md z-40 pointer-events-none"
       >
         <span className="text-xs text-gray-700 font-medium">AIコンシェルジュ</span>
       </motion.div>
