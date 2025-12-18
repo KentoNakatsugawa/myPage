@@ -30,11 +30,35 @@ export default function RoadPath() {
   // Calculate car position based on current station
   const currentStation = stations[currentStationIndex];
 
-  return (
-    <div className="bg-gradient-to-br from-norel-green-light to-green-100 rounded-2xl p-4 mx-4 my-4 overflow-hidden">
-      <h3 className="text-sm font-bold text-gray-700 mb-2">WITH Path</h3>
+  // Get current phase name
+  const getPhaseInfo = (stationIndex: number) => {
+    const phases = [
+      { name: '申込フェーズ', desc: '前受金のお支払い' },
+      { name: '契約フェーズ', desc: '電子契約・口座登録' },
+      { name: '書類フェーズ', desc: '必要書類の提出' },
+      { name: '準備フェーズ', desc: '車両の準備中' },
+      { name: '納車フェーズ', desc: '納車日の確定' },
+      { name: '利用中', desc: 'カーライフをお楽しみください' },
+    ];
+    return phases[stationIndex] || phases[0];
+  };
+  const phaseInfo = getPhaseInfo(currentStationIndex);
 
-      <div className="relative h-52">
+  return (
+    <div className="bg-gradient-to-br from-norel-green-light to-green-100 rounded-2xl p-4 mx-4 mt-4 mb-2 overflow-hidden shadow-sm">
+      {/* Header with current phase */}
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="text-lg font-bold text-gray-800">WITH Path</h3>
+          <p className="text-xs text-gray-600">あなたの納車までの道のり</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-bold text-norel-green">{phaseInfo.name}</p>
+          <p className="text-xs text-gray-500">{phaseInfo.desc}</p>
+        </div>
+      </div>
+
+      <div className="relative h-56">
         <svg
           viewBox="0 0 370 200"
           className="w-full h-full"
