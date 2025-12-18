@@ -101,15 +101,15 @@ export default function MenuDrawer() {
             <div className="relative">
               <div className="aspect-[16/9] overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=800&q=80"
-                  alt="Toyota Crown"
+                  src="https://images.unsplash.com/photo-1621993202323-eb4b3b8e5e55?w=800&q=80"
+                  alt="Toyota Camry"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                 <p className="text-white/80 text-xs">ご契約中の車両</p>
-                <p className="text-white text-lg font-bold">トヨタ プリウス</p>
-                <p className="text-white/70 text-xs mt-1">2024年式 / ホワイトパール</p>
+                <p className="text-white text-lg font-bold">トヨタ カムリ</p>
+                <p className="text-white/70 text-xs mt-1">2023年式 / アティチュードブラックマイカ</p>
               </div>
             </div>
 

@@ -39,7 +39,7 @@ const defaultState: NorelState = {
     amount: 39800,
   },
   vehicleInfo: {
-    name: 'トヨタ プリウス',
+    name: 'トヨタ カムリ',
     estimatedValue: 1450000,
     recommendationLevel: 5,
   },
