@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, ChevronRight, X, Calendar, Check } from 'lucide-react';
+import { CreditCard, ChevronRight, X, Check } from 'lucide-react';
 import { useNorel } from '@/contexts/NorelContext';
 
 // Generate 82 months of payment schedule starting from contract date
@@ -36,8 +36,15 @@ export default function PaymentWidget() {
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
   const paymentSchedule = generatePaymentSchedule(paymentInfo.amount);
+  const totalPayments = paymentSchedule.length;
   const paidCount = paymentSchedule.filter(p => p.isPaid).length;
-  const remainingCount = paymentSchedule.length - paidCount;
+  const remainingCount = totalPayments - paidCount;
+
+  // 金額計算
+  const totalAmount = paymentInfo.amount * totalPayments;
+  const paidAmount = paymentInfo.amount * paidCount;
+  const remainingAmount = paymentInfo.amount * remainingCount;
+  const progressPercentage = (paidCount / totalPayments) * 100;
 
   return (
     <>
@@ -90,9 +97,6 @@ export default function PaymentWidget() {
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                  </div>
                   <div>
                     <h2 className="text-lg font-bold text-gray-900">お支払いスケジュール</h2>
                     <p className="text-xs text-gray-500">{userProfile.name} 様</p>
@@ -106,30 +110,57 @@ export default function PaymentWidget() {
                 </button>
               </div>
 
-              {/* Summary */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-xs text-gray-500">月額お支払い</p>
-                    <p className="text-xl font-bold text-gray-900">¥{paymentInfo.amount.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">お支払い回数</p>
-                    <p className="text-sm font-medium text-gray-700">
-                      <span className="text-blue-600 font-bold">{paidCount}</span> / {paymentSchedule.length}回
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">残り</p>
-                    <p className="text-sm font-bold text-indigo-600">{remainingCount}回</p>
-                  </div>
+              {/* Summary - Reference Image Style */}
+              <div className="p-6 bg-white border-b border-gray-100">
+                {/* Total Amount */}
+                <div className="text-center mb-6">
+                  <p className="text-sm text-gray-500 mb-2">お支払総額</p>
+                  <p className="text-4xl font-light text-gray-800">
+                    {totalAmount.toLocaleString()}
+                    <span className="text-xl ml-1">円</span>
+                  </p>
                 </div>
-                <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+
+                {/* Progress Bar */}
+                <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden mb-6">
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all"
-                    style={{ width: `${(paidCount / paymentSchedule.length) * 100}%` }}
+                    className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${progressPercentage}%`,
+                      background: 'linear-gradient(to right, #F97316, #FB923C)',
+                    }}
                   />
                 </div>
+
+                {/* Paid / Remaining */}
+                <div className="flex border-t border-gray-200">
+                  <div className="flex-1 py-4 text-center border-r border-gray-200">
+                    <p className="text-xs text-gray-500 mb-1">お支払済</p>
+                    <p className="text-xl font-medium text-gray-800">
+                      {paidAmount.toLocaleString()}
+                      <span className="text-sm ml-1">円</span>
+                    </p>
+                  </div>
+                  <div className="flex-1 py-4 text-center">
+                    <p className="text-xs text-gray-500 mb-1">ご利用残高</p>
+                    <p className="text-xl font-medium text-gray-800">
+                      {remainingAmount.toLocaleString()}
+                      <span className="text-sm ml-1">円</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Remaining Payments Count */}
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-600">
+                    残支払回数：<span className="font-medium">{remainingCount}回</span> / {totalPayments}回
+                  </p>
+                </div>
+
+                {/* Disclaimer */}
+                <p className="text-xs text-gray-400 text-center mt-4">
+                  ※実際のお支払金額と異なる場合がございます。
+                </p>
               </div>
 
               {/* Schedule Table */}
@@ -178,9 +209,15 @@ export default function PaymentWidget() {
 
               {/* Footer */}
               <div className="p-4 border-t border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-500 text-center">
+                <p className="text-xs text-gray-500 text-center mb-3">
                   毎月5日に登録口座より自動引き落としされます
                 </p>
+                <button
+                  onClick={() => setIsScheduleOpen(false)}
+                  className="w-full py-3 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition-colors"
+                >
+                  閉じる
+                </button>
               </div>
             </motion.div>
           </motion.div>
