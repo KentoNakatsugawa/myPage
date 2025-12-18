@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { NorelProvider } from '@/contexts/NorelContext';
+import ResponsiveWrapper from '@/components/ResponsiveWrapper';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,8 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="antialiased">
-        <NorelProvider>{children}</NorelProvider>
+      <body className="antialiased bg-gray-100">
+        <NorelProvider>
+          <ResponsiveWrapper>{children}</ResponsiveWrapper>
+        </NorelProvider>
       </body>
     </html>
   );
