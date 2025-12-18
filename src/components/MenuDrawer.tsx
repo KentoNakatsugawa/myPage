@@ -101,7 +101,7 @@ export default function MenuDrawer() {
             <div className="relative">
               <div className="aspect-[16/9] overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1621993202323-eb4b3b8e5e55?w=800&q=80"
+                  src="https://images.unsplash.com/photo-1550355291-bbee04a92027?w=800&q=80"
                   alt="Toyota Camry"
                   className="w-full h-full object-cover"
                 />

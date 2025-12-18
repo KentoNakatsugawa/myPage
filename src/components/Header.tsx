@@ -6,7 +6,7 @@ import { Menu } from 'lucide-react';
 import { useNorel } from '@/contexts/NorelContext';
 
 export default function Header() {
-  const { norelScore, toggleMenu } = useNorel();
+  const { toggleMenu } = useNorel();
 
   return (
     <header className="bg-white sticky top-0 z-40 border-b border-gray-100">
@@ -27,16 +27,6 @@ export default function Header() {
 
         {/* Right Side */}
         <div className="flex items-center gap-3">
-          {/* Score Badge */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm"
-          >
-            NORELスコア: {norelScore}
-          </motion.div>
-
           {/* Hamburger Menu */}
           <motion.button
             whileTap={{ scale: 0.9 }}
