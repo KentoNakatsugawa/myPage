@@ -88,10 +88,10 @@ export default function ScoreMeter() {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="mx-4 mt-4 mb-2"
     >
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 shadow-xl">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-lg">
         {/* Title */}
         <div className="text-center mb-1">
-          <h3 className="text-white/80 text-xs font-medium tracking-wider">NOREL SCORE</h3>
+          <h3 className="text-gray-500 text-xs font-medium tracking-wider">NOREL SCORE</h3>
         </div>
 
         {/* Meter */}
@@ -119,7 +119,7 @@ export default function ScoreMeter() {
             <path
               d={`M ${arcStartX} ${cy} A ${radius} ${radius} 0 0 1 ${arcEndX} ${cy}`}
               fill="none"
-              stroke="#374151"
+              stroke="#E5E7EB"
               strokeWidth="14"
               strokeLinecap="round"
             />
@@ -140,7 +140,7 @@ export default function ScoreMeter() {
             {ticks}
 
             {/* Center decoration */}
-            <circle cx={cx} cy={cy} r="10" fill="#1F2937" stroke="#374151" strokeWidth="2" />
+            <circle cx={cx} cy={cy} r="10" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="2" />
 
             {/* Needle - using CSS transform with exact center */}
             <g style={{ transform: `rotate(${needleAngle}deg)`, transformOrigin: `${cx}px ${cy}px`, transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
@@ -154,7 +154,7 @@ export default function ScoreMeter() {
               <circle cx={cx} cy={cy} r="8" fill={scoreLevel.color} />
             </g>
             {/* Center cap overlay */}
-            <circle cx={cx} cy={cy} r="5" fill="#1F2937" />
+            <circle cx={cx} cy={cy} r="5" fill="#F9FAFB" />
           </svg>
         </div>
 
@@ -166,10 +166,10 @@ export default function ScoreMeter() {
             transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
             className="inline-block"
           >
-            <span className="text-4xl font-bold text-white tracking-tight">
+            <span className="text-4xl font-bold text-gray-800 tracking-tight">
               {norelScore}
             </span>
-            <span className="text-white/50 text-sm ml-1">pt</span>
+            <span className="text-gray-400 text-sm ml-1">pt</span>
           </motion.div>
 
           {/* Score Level Badge */}
@@ -188,8 +188,8 @@ export default function ScoreMeter() {
         </div>
 
         {/* Score Reasons */}
-        <div className="mt-4 pt-3 border-t border-gray-700">
-          <p className="text-gray-500 text-xs mb-2">最近のスコアUPへの感謝</p>
+        <div className="mt-4 pt-3 border-t border-gray-200">
+          <p className="text-gray-400 text-xs mb-2">最近のスコアUPへの感謝</p>
           <div className="space-y-2">
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -197,8 +197,8 @@ export default function ScoreMeter() {
               transition={{ delay: 1.1 }}
               className="flex items-start gap-2"
             >
-              <span className="text-green-400 text-sm">✓</span>
-              <p className="text-white/90 text-xs">期日内に前受金をしっかりお支払いいただきました！</p>
+              <span className="text-norel-green text-sm">✓</span>
+              <p className="text-gray-600 text-xs">期日内に前受金をしっかりお支払いいただきました！</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -206,8 +206,8 @@ export default function ScoreMeter() {
               transition={{ delay: 1.2 }}
               className="flex items-start gap-2"
             >
-              <span className="text-green-400 text-sm">✓</span>
-              <p className="text-white/90 text-xs">オイル交換をしてくれてありがとう！</p>
+              <span className="text-norel-green text-sm">✓</span>
+              <p className="text-gray-600 text-xs">オイル交換をしてくれてありがとう！</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -215,8 +215,8 @@ export default function ScoreMeter() {
               transition={{ delay: 1.3 }}
               className="flex items-start gap-2"
             >
-              <span className="text-green-400 text-sm">✓</span>
-              <p className="text-white/90 text-xs">毎月の引き落としが順調です！</p>
+              <span className="text-norel-green text-sm">✓</span>
+              <p className="text-gray-600 text-xs">毎月の引き落としが順調です！</p>
             </motion.div>
           </div>
         </div>
