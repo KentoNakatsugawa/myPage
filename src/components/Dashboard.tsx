@@ -14,7 +14,10 @@ import { useNorel } from '@/contexts/NorelContext';
 
 export default function Dashboard() {
   const [isScoreExpanded, setIsScoreExpanded] = useState(false);
-  const { norelScore } = useNorel();
+  const { norelScore, currentStep } = useNorel();
+
+  // Check if delivery is complete (step 8 = 利用中)
+  const isDeliveryComplete = currentStep === 8;
 
   // Determine score level
   const getScoreLevel = (score: number) => {
@@ -30,14 +33,21 @@ export default function Dashboard() {
       <Header />
 
       <main className="pb-32">
-        {/* WITH Path (The Compass) - Featured at top */}
-        <RoadPath />
-
-        {/* Active Mission / Value Card */}
-        <MissionCard />
-
-        {/* WITH Payment Widget */}
-        <PaymentWidget />
+        {isDeliveryComplete ? (
+          <>
+            {/* After Delivery: Payment first, then Mission, then Path */}
+            <PaymentWidget />
+            <MissionCard />
+            <RoadPath />
+          </>
+        ) : (
+          <>
+            {/* Before Delivery: Path first, then Mission, then Payment */}
+            <RoadPath />
+            <MissionCard />
+            <PaymentWidget />
+          </>
+        )}
       </main>
 
       {/* NOREL Score Bottom Bar */}
