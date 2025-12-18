@@ -108,8 +108,8 @@ export default function MenuDrawer() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                 <p className="text-white/80 text-xs">ご契約中の車両</p>
-                <p className="text-white text-lg font-bold">トヨタ カムリ</p>
-                <p className="text-white/70 text-xs mt-1">2023年式 / アティチュードブラックマイカ</p>
+                <p className="text-white text-lg font-bold">BMW 320d Mスポーツ</p>
+                <p className="text-white/70 text-xs mt-1">2018年式 / サファイアブラック</p>
               </div>
             </div>
 

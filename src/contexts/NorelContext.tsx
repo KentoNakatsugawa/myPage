@@ -39,7 +39,7 @@ const defaultState: NorelState = {
     amount: 39800,
   },
   vehicleInfo: {
-    name: 'トヨタ カムリ',
+    name: 'BMW 320d Mスポーツ',
     estimatedValue: 1450000,
     recommendationLevel: 5,
   },
