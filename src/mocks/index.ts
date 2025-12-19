@@ -16,3 +16,6 @@ export {
 
 // Billing mock data
 export { receipts, invoices, type BillingItem } from './billing';
+
+// FAQ mock data
+export { faqData, aiMockResponses, type FaqItem } from './faq';

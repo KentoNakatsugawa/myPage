@@ -3,40 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, HelpCircle } from 'lucide-react';
-
-// よくある質問とその回答
-const faqData = [
-  {
-    id: 1,
-    question: '月額料金に含まれるものは何ですか？',
-    answer: '月額料金には、車両代、登録諸費用、自動車税、重量税、自賠責保険料、車検費用が含まれています。ガソリン代、駐車場代、任意保険料は別途お客様のご負担となります。',
-  },
-  {
-    id: 2,
-    question: '契約期間中に解約はできますか？',
-    answer: 'はい、中途解約は可能です。ただし、残りのリース期間に応じた中途解約金が発生いたします。詳しくは契約書の「中途解約」条項をご確認いただくか、サポートセンターまでお問い合わせください。',
-  },
-  {
-    id: 3,
-    question: '走行距離に制限はありますか？',
-    answer: 'ご契約プランにより月間走行距離の上限が設定されています。標準プランは月2,000km、超過した場合は1kmあたり所定の追加料金が発生します。走行距離が多い方向けのプランもご用意しております。',
-  },
-  {
-    id: 4,
-    question: '車検や点検はどうなりますか？',
-    answer: '車検費用は月額料金に含まれています。車検時期が近づきましたら、当社よりご案内いたします。日常点検や消耗品の交換については、提携整備工場をご利用いただけます。',
-  },
-  {
-    id: 5,
-    question: '事故を起こした場合はどうすればいいですか？',
-    answer: 'まずは安全を確保し、警察へ届け出てください。その後、NORELサポートセンター（0120-XXX-XXX）へご連絡ください。任意保険にご加入の場合は、保険会社への連絡もお願いいたします。',
-  },
-  {
-    id: 6,
-    question: '契約終了後、車はどうなりますか？',
-    answer: '契約満了時には、①車両を返却、②新しい車に乗り換え、③残価をお支払いいただき買取、の3つの選択肢からお選びいただけます。満了の3ヶ月前にご案内をお送りいたします。',
-  },
-];
+import { faqData, aiMockResponses } from '@/mocks';
 
 export default function AIConcierge() {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,14 +63,8 @@ export default function AIConcierge() {
 
     // Mock AI response
     setTimeout(() => {
-      const aiResponses = [
-        'ありがとうございます。確認いたしますので少々お待ちください。',
-        'かしこまりました。詳しい情報をお調べいたします。',
-        '承知いたしました。担当者にお繋ぎすることもできますが、いかがでしょうか？',
-        'ご質問ありがとうございます。こちらについては、契約書をご確認いただくか、サポートセンターまでお問い合わせください。',
-      ];
       const randomResponse =
-        aiResponses[Math.floor(Math.random() * aiResponses.length)];
+        aiMockResponses[Math.floor(Math.random() * aiMockResponses.length)];
 
       setMessages((prev) => [
         ...prev,
@@ -236,7 +197,7 @@ export default function AIConcierge() {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="メッセージを入力..."
                     className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-norel-green"
                   />
