@@ -13,97 +13,10 @@ import {
   AlertTriangle,
   Star,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { useNorel } from '@/contexts/NorelContext';
-import { StepInfo } from '@/types';
+import { stepData, alertData } from '@/mocks';
+import { useConfetti } from '@/hooks';
 import VehicleRecommendModal from './VehicleRecommendModal';
-
-const stepData: StepInfo[] = [
-  {
-    id: 1,
-    phase: 'Entry',
-    title: '前受金のお支払い (1/2)',
-    description:
-      'まずは最初の決済をお願いします。\nクレジットカードがご利用いただけます。',
-    buttonLabel: '支払画面へ進む',
-  },
-  {
-    id: 2,
-    phase: 'Entry',
-    title: '前受金のお支払い (2/2)',
-    description:
-      '残りの金額のお支払いをお願いします。\nこれが完了すると契約へ進めます。',
-    buttonLabel: '残金を支払う',
-  },
-  {
-    id: 3,
-    phase: 'Contract',
-    title: '電子契約書の締結',
-    description:
-      '契約内容をご確認の上、\n電子サインをお願いいたします。',
-    buttonLabel: '契約書を確認してサイン',
-  },
-  {
-    id: 4,
-    phase: 'Contract',
-    title: '引き落とし口座の登録',
-    description: '毎月5日の引き落とし口座を\n設定してください。',
-    buttonLabel: '口座を登録する',
-  },
-  {
-    id: 5,
-    phase: 'Garage',
-    title: '必要書類の提出',
-    description:
-      '車庫証明と住民票の写真を\nアップロードしてください。',
-    buttonLabel: '書類をアップロード',
-  },
-  {
-    id: 6,
-    phase: 'Preparation',
-    title: '車両準備中',
-    description:
-      '名義変更・車検・クリーニング・\n整備・輸送手配を行っています。',
-    buttonLabel: '準備状況を確認',
-  },
-  {
-    id: 7,
-    phase: 'Delivery',
-    title: '納車日の確定',
-    description:
-      'お届け先の住所と\n希望日時を選択してください。',
-    buttonLabel: '納車日を予約する',
-  },
-  {
-    id: 8,
-    phase: 'Active',
-    title: 'AI査定: 乗り換えチャンス',
-    description:
-      '現在の市場価格が高騰しています。\nお得に乗り換えるチャンスです。',
-    buttonLabel: '査定詳細・カタログを見る',
-  },
-];
-
-const alertData = {
-  license: {
-    title: '【重要】免許証の更新',
-    description:
-      '免許証の有効期限が近づいています。\n新しい免許証を登録してください。',
-    buttonLabel: '免許証を撮影する',
-  },
-  insurance: {
-    title: '【重要】保険証券の更新',
-    description:
-      '保険証券の有効期限が近づいています。\n新しい保険証券をアップロードしてください。',
-    buttonLabel: '保険証券をアップロード',
-  },
-  shaken: {
-    title: '【重要】車検の更新',
-    description:
-      '車検の有効期限が近づいています。\n車検証をアップロードしてください。',
-    buttonLabel: '車検証をアップロード',
-  },
-};
 
 function getStepIcon(step: number) {
   const icons = {
@@ -122,6 +35,7 @@ function getStepIcon(step: number) {
 export default function MissionCard() {
   const { currentStep, alertType, nextStep, clearAlert, vehicleInfo } = useNorel();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
+  const { triggerConfetti } = useConfetti();
 
   const handleAction = () => {
     if (alertType) {
@@ -137,12 +51,7 @@ export default function MissionCard() {
 
     // Trigger confetti for Step 3 and Step 7
     if (currentStep === 3 || currentStep === 7) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#00A040', '#06C755', '#FFD700'],
-      });
+      triggerConfetti();
     }
 
     nextStep();

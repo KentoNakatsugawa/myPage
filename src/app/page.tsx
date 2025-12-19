@@ -1,29 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNorel } from '@/contexts/NorelContext';
 import { Dashboard } from '@/components';
 import LineMockUI from '@/components/LineMockUI';
+import { useMiniAppLaunch } from '@/hooks';
 
 export default function Home() {
-  const { isAuthenticated, login } = useNorel();
-  const [showMiniApp, setShowMiniApp] = useState(false);
-  const [isLaunching, setIsLaunching] = useState(false);
+  const { login } = useNorel();
 
-  const handleLaunchMiniApp = () => {
-    setIsLaunching(true);
-    // Simulate mini app launch animation
-    setTimeout(() => {
-      login();
-      setShowMiniApp(true);
-      setIsLaunching(false);
-    }, 800);
-  };
-
-  const handleCloseMiniApp = () => {
-    setShowMiniApp(false);
-  };
+  const {
+    showMiniApp,
+    isLaunching,
+    launchMiniApp,
+    closeMiniApp,
+  } = useMiniAppLaunch({
+    onLaunchComplete: login,
+  });
 
   return (
     <div className="h-screen overflow-hidden">
@@ -36,7 +29,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             className="h-full"
           >
-            <LineMockUI onLaunchMiniApp={handleLaunchMiniApp} />
+            <LineMockUI onLaunchMiniApp={launchMiniApp} />
 
             {/* Launch Overlay */}
             <AnimatePresence>
@@ -77,7 +70,7 @@ export default function Home() {
             {/* Mini App Header */}
             <div className="bg-norel-green px-4 py-3 flex items-center justify-between sticky top-0 z-50">
               <button
-                onClick={handleCloseMiniApp}
+                onClick={closeMiniApp}
                 className="text-white text-sm font-medium flex items-center gap-1"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">

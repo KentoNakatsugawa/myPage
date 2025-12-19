@@ -3,25 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNorel } from '@/contexts/NorelContext';
-
-const stations = [
-  { id: 1, label: '申込', x: 30, y: 160 },
-  { id: 2, label: '契約', x: 85, y: 100 },
-  { id: 3, label: '書類', x: 150, y: 140 },
-  { id: 4, label: '車両準備', x: 215, y: 80 },
-  { id: 5, label: '納車', x: 280, y: 130 },
-  { id: 6, label: '利用中', x: 340, y: 90 },
-];
-
-// Map step numbers (1-8) to station index (0-5)
-function getStationIndex(step: number): number {
-  if (step <= 2) return 0; // Steps 1-2: Entry (申込)
-  if (step <= 4) return 1; // Steps 3-4: Contract (契約)
-  if (step === 5) return 2; // Step 5: Docs (書類)
-  if (step === 6) return 3; // Step 6: Vehicle Preparation (車両準備)
-  if (step === 7) return 4; // Step 7: Delivery (納車)
-  return 5; // Step 8: Active (利用中)
-}
+import { stations, getStationIndex, phaseInfo as phaseData } from '@/mocks';
 
 export default function RoadPath() {
   const { currentStep } = useNorel();
@@ -30,19 +12,8 @@ export default function RoadPath() {
   // Calculate car position based on current station
   const currentStation = stations[currentStationIndex];
 
-  // Get current phase name
-  const getPhaseInfo = (stationIndex: number) => {
-    const phases = [
-      { name: '申込フェーズ', desc: '前受金のお支払い' },
-      { name: '契約フェーズ', desc: '電子契約・口座登録' },
-      { name: '書類フェーズ', desc: '必要書類の提出' },
-      { name: '準備フェーズ', desc: '車両の準備中' },
-      { name: '納車フェーズ', desc: '納車日の確定' },
-      { name: '利用中', desc: 'カーライフをお楽しみください' },
-    ];
-    return phases[stationIndex] || phases[0];
-  };
-  const phaseInfo = getPhaseInfo(currentStationIndex);
+  // Get current phase info
+  const currentPhaseInfo = phaseData[currentStationIndex] || phaseData[0];
 
   return (
     <div className="bg-gradient-to-br from-norel-green-light to-green-100 rounded-2xl p-4 mx-4 mt-4 mb-2 overflow-hidden shadow-sm">
@@ -53,8 +24,8 @@ export default function RoadPath() {
           <p className="text-xs text-gray-600">あなたの納車までの道のり</p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-bold text-norel-green">{phaseInfo.name}</p>
-          <p className="text-xs text-gray-500">{phaseInfo.desc}</p>
+          <p className="text-sm font-bold text-norel-green">{currentPhaseInfo.name}</p>
+          <p className="text-xs text-gray-500">{currentPhaseInfo.desc}</p>
         </div>
       </div>
 

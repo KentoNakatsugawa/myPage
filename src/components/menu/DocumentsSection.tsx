@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Receipt, FileCheck, Download, ChevronRight } from 'lucide-react';
-import { invoices, receipts } from './mockData';
+import { invoices, receipts } from '@/mocks';
 import { downloadInvoice, downloadReceipt } from '../DocumentGenerator';
 
 interface DocumentsSectionProps {
