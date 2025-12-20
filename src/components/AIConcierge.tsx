@@ -1,118 +1,99 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, HelpCircle, Loader2, Sparkles } from 'lucide-react';
+import {
+  MessageCircle,
+  X,
+  Send,
+  Loader2,
+  Sparkles,
+  HelpCircle,
+} from 'lucide-react';
 import { faqData, aiMockResponses } from '@/mocks';
 
-// Geometric pattern background for chat area
-function GeometricPattern() {
-  return (
-    <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="geometric" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-          <path d="M30 0L60 30L30 60L0 30Z" fill="none" stroke="currentColor" strokeWidth="0.5" />
-          <circle cx="30" cy="30" r="10" fill="none" stroke="currentColor" strokeWidth="0.5" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#geometric)" />
-    </svg>
-  );
-}
+type Message = {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+};
 
 export default function AIConcierge() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<
-    { id: number; text: string; isUser: boolean }[]
-  >([
+  const [messages, setMessages] = useState<Message[]>([
     {
-      id: 1,
-      text: 'こんにちは！NOREL AIコンシェルジュです。下のよくある質問をタップするか、お気軽にメッセージをお送りください。',
+      id: '1',
+      text: 'こんにちは！NORELコンシェルジュです。\nご契約に関するご質問やお困りのことがあれば、お気軽にご相談ください。',
       isUser: false,
+      timestamp: new Date(),
     },
   ]);
   const [inputText, setInputText] = useState('');
-  const [showFaq, setShowFaq] = useState(true);
-  const [isSending, setIsSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto scroll to bottom when new message arrives
-  useEffect(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   // Auto-resize textarea
-  const adjustTextareaHeight = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-    }
-  }, []);
-
   useEffect(() => {
-    adjustTextareaHeight();
-  }, [inputText, adjustTextareaHeight]);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [inputText]);
 
-  const handleFaqClick = (faq: typeof faqData[0]) => {
-    // Add user's question
-    const userMessage = {
-      id: messages.length + 1,
-      text: faq.question,
-      isUser: true,
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setShowFaq(false);
-    setIsSending(true);
+  const generateResponse = (userMessage: string): string => {
+    const lowerMessage = userMessage.toLowerCase();
 
-    // Add AI's answer after a short delay
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          text: faq.answer,
-          isUser: false,
-        },
-      ]);
-      setIsSending(false);
-    }, 500);
+    for (const response of aiMockResponses) {
+      if (response.keywords.some((keyword) => lowerMessage.includes(keyword))) {
+        return response.response;
+      }
+    }
+
+    return 'ご質問ありがとうございます。\nお問い合わせ内容を確認し、担当者よりご連絡いたします。\n\nお急ぎの場合は、0120-XXX-XXXまでお電話ください。';
   };
 
   const handleSend = () => {
-    if (!inputText.trim() || isSending) return;
+    if (!inputText.trim()) return;
 
-    const userMessage = {
-      id: messages.length + 1,
+    const userMessage: Message = {
+      id: Date.now().toString(),
       text: inputText,
       isUser: true,
+      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInputText('');
-    setShowFaq(false);
-    setIsSending(true);
+    setIsTyping(true);
 
-    // Mock AI response
     setTimeout(() => {
-      const randomResponse =
-        aiMockResponses[Math.floor(Math.random() * aiMockResponses.length)];
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          text: randomResponse,
-          isUser: false,
-        },
-      ]);
-      setIsSending(false);
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: generateResponse(inputText),
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiResponse]);
+      setIsTyping(false);
     }, 1000);
   };
 
-  // Handle Enter key (send) and Shift+Enter (newline)
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleFaqClick = (question: string) => {
+    setInputText(question);
+    setTimeout(() => handleSend(), 100);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -121,31 +102,18 @@ export default function AIConcierge() {
 
   return (
     <>
-      {/* Floating Button - with glow animation */}
+      {/* Floating Button */}
       <motion.button
         onClick={() => setIsOpen(true)}
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 bg-norel-green text-white rounded-full shadow-lg flex items-center justify-center"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.5 }}
-        className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-r from-norel-green to-emerald-500 rounded-full shadow-glow-green flex items-center justify-center z-40 hover:shadow-lg hover:shadow-norel-green/50 transition-all"
+        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
       >
-        <MessageCircle className="w-6 h-6 text-white" />
+        <MessageCircle className="w-6 h-6" />
       </motion.button>
-
-      {/* Label - glassmorphism */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.7 }}
-        className="fixed bottom-[104px] right-24 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-glass z-40 pointer-events-none border border-white/30"
-      >
-        <span className="text-xs text-gray-700 font-medium flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-norel-green" />
-          AIコンシェルジュ
-        </span>
-      </motion.div>
 
       {/* Chat Modal */}
       <AnimatePresence>
@@ -154,7 +122,7 @@ export default function AIConcierge() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end justify-center sm:items-center"
+            className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
             onClick={() => setIsOpen(false)}
           >
             <motion.div
@@ -163,166 +131,150 @@ export default function AIConcierge() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-white/90 backdrop-blur-2xl rounded-t-[32px] sm:rounded-[32px] overflow-hidden h-[80vh] sm:h-[600px] flex flex-col shadow-glass-lg border-t border-white/30"
+              className="w-full max-w-lg bg-white rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl"
             >
-              {/* Header - Gradient with glassmorphism */}
-              <div className="bg-gradient-to-r from-norel-green to-emerald-500 px-5 py-4 flex items-center justify-between relative overflow-hidden">
-                {/* Decorative elements */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                <div className="absolute -bottom-5 -left-5 w-20 h-20 bg-white/10 rounded-full blur-xl" />
-
-                <div className="flex items-center gap-3 relative z-10">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                    className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30"
-                  >
-                    <MessageCircle className="w-5 h-5 text-white" />
-                  </motion.div>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-norel-green rounded-full flex items-center justify-center shadow-md">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="text-white font-bold flex items-center gap-1.5">
-                      AIコンシェルジュ
-                      <Sparkles className="w-4 h-4 text-yellow-300" />
-                    </h3>
-                    <p className="text-white/80 text-xs">いつでもお手伝いします</p>
+                    <h3 className="text-base font-bold text-gray-900">NORELコンシェルジュ</h3>
+                    <p className="text-xs text-gray-500">AIサポート</p>
                   </div>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setIsOpen(false)}
-                  className="p-3 hover:bg-white/20 rounded-full transition-colors relative z-10"
-                  aria-label="閉じる"
+                  className="p-2 hover:bg-gray-100 rounded-full"
                 >
-                  <X className="w-6 h-6 text-white" />
+                  <X className="w-5 h-5 text-gray-500" />
                 </motion.button>
               </div>
 
-              {/* Messages - with geometric pattern background */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 relative bg-gradient-to-b from-gray-50 to-white">
-                <GeometricPattern />
-
-                <div className="relative z-10 space-y-4">
-                  {messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] px-4 py-3 rounded-2xl shadow-sm ${
+                        message.isUser
+                          ? 'bg-norel-green text-white rounded-br-md'
+                          : 'bg-white text-gray-800 border border-gray-100 rounded-bl-md'
+                      }`}
                     >
-                      <div
-                        className={`max-w-[80%] px-4 py-3 ${
-                          message.isUser
-                            ? 'bg-gradient-to-r from-norel-green to-emerald-500 text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl shadow-lg shadow-norel-green/20'
-                            : 'bg-white/80 backdrop-blur-md text-gray-800 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl shadow-glass border border-white/50'
+                      <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
+                      <p
+                        className={`text-xs mt-1.5 ${
+                          message.isUser ? 'text-white/70' : 'text-gray-400'
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.text}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                        {message.timestamp.toLocaleTimeString('ja-JP', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
 
-                  {/* Typing indicator - enhanced */}
-                  {isSending && (
+                {/* Typing Indicator */}
+                <AnimatePresence>
+                  {isTyping && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
                       className="flex justify-start"
                     >
-                      <div className="bg-white/80 backdrop-blur-md text-gray-500 px-4 py-3 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl shadow-glass border border-white/50">
+                      <div className="bg-white text-gray-800 border border-gray-100 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
                         <div className="flex items-center gap-1.5">
-                          {[0, 1, 2].map((i) => (
-                            <motion.span
-                              key={i}
-                              className="w-2.5 h-2.5 bg-gradient-to-r from-norel-green to-emerald-400 rounded-full"
-                              animate={{ y: [0, -6, 0] }}
-                              transition={{
-                                duration: 0.6,
-                                repeat: Infinity,
-                                delay: i * 0.15,
-                              }}
-                            />
-                          ))}
+                          <motion.span
+                            className="w-2 h-2 bg-norel-green rounded-full"
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                          />
+                          <motion.span
+                            className="w-2 h-2 bg-norel-green rounded-full"
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                          />
+                          <motion.span
+                            className="w-2 h-2 bg-norel-green rounded-full"
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                          />
                         </div>
                       </div>
                     </motion.div>
                   )}
+                </AnimatePresence>
 
-                  {/* FAQ Suggestions - glassmorphism cards */}
-                  {showFaq && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="space-y-3"
-                    >
-                      <div className="flex items-center gap-2 text-gray-500 text-xs">
-                        <HelpCircle className="w-4 h-4" />
-                        <span>よくある質問</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {faqData.map((faq, index) => (
-                          <motion.button
-                            key={faq.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.4 + index * 0.1 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleFaqClick(faq)}
-                            className="px-3 py-2 bg-white/70 backdrop-blur-sm border border-norel-green/30 text-norel-green text-xs rounded-full hover:bg-norel-green-light hover:border-norel-green transition-all shadow-sm"
-                          >
-                            {faq.question}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
+                <div ref={messagesEndRef} />
               </div>
 
-              {/* Input - Floating style with glassmorphism */}
-              <div className="p-4 bg-transparent">
-                <motion.div
-                  className="flex items-end gap-2 bg-white/80 backdrop-blur-xl border border-white/50 rounded-full px-4 py-2 shadow-glass-lg"
-                  whileFocus={{ boxShadow: '0 0 20px rgba(0, 160, 64, 0.2)' }}
-                >
-                  <div className="flex-1">
-                    <textarea
-                      ref={textareaRef}
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="メッセージを入力..."
-                      rows={1}
-                      className="w-full resize-none outline-none text-sm bg-transparent min-h-[24px] max-h-[120px]"
-                      disabled={isSending}
-                    />
+              {/* FAQ Quick Actions */}
+              {messages.length === 1 && (
+                <div className="px-4 py-3 border-t border-gray-100 bg-white">
+                  <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                    <HelpCircle className="w-3 h-3" />
+                    よくあるご質問
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {faqData.slice(0, 4).map((faq, index) => (
+                      <motion.button
+                        key={faq.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        onClick={() => handleFaqClick(faq.question)}
+                        className="text-xs bg-gray-100 text-gray-700 px-3 py-2 rounded-full hover:bg-norel-green-light hover:text-norel-green transition-colors"
+                      >
+                        {faq.shortLabel}
+                      </motion.button>
+                    ))}
                   </div>
+                </div>
+              )}
+
+              {/* Input Area */}
+              <div className="p-4 border-t border-gray-100 bg-white">
+                <div className="flex items-end gap-3">
+                  <textarea
+                    ref={textareaRef}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="メッセージを入力..."
+                    rows={1}
+                    className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-norel-green/20 focus:border-norel-green max-h-[120px]"
+                  />
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleSend}
-                    disabled={isSending || !inputText.trim()}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                      isSending || !inputText.trim()
-                        ? 'bg-gray-200 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-norel-green to-emerald-500 shadow-lg shadow-norel-green/30'
+                    disabled={!inputText.trim() || isTyping}
+                    className={`p-3 rounded-full transition-all ${
+                      inputText.trim() && !isTyping
+                        ? 'bg-norel-green text-white shadow-md'
+                        : 'bg-gray-200 text-gray-400'
                     }`}
-                    aria-label="送信"
                   >
-                    {isSending ? (
-                      <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                    {isTyping ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
-                      <Send className="w-5 h-5 text-white" />
+                      <Send className="w-5 h-5" />
                     )}
                   </motion.button>
-                </motion.div>
-                <p className="text-[10px] text-gray-400 text-center mt-2">
-                  Shift + Enter で改行
-                </p>
+                </div>
               </div>
             </motion.div>
           </motion.div>

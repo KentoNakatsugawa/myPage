@@ -153,7 +153,7 @@ export default function PaymentWidget() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-t-3xl w-full max-w-lg max-h-[85vh] flex flex-col"
+              className="bg-white rounded-t-3xl w-full max-w-lg h-[90vh] flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -187,19 +187,24 @@ export default function PaymentWidget() {
                 </div>
               </div>
 
-              {/* Summary */}
-              <div className="p-6 bg-white border-b border-gray-100">
-                {/* Total Amount */}
-                <div className="text-center mb-6">
-                  <p className="text-sm text-gray-500 mb-2">お支払総額（全{totalPayments}回）</p>
-                  <p className="text-4xl font-light text-gray-800">
-                    {totalAmount.toLocaleString()}
-                    <span className="text-xl ml-1">円</span>
-                  </p>
+              {/* Summary - Compact */}
+              <div className="p-4 bg-white border-b border-gray-100">
+                {/* Total Amount - Inline with Progress */}
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs text-gray-500">お支払総額（全{totalPayments}回）</p>
+                    <p className="text-2xl font-bold text-gray-800">
+                      ¥{totalAmount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">残支払</p>
+                    <p className="text-lg font-medium text-gray-600">{remainingCount}回</p>
+                  </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden mb-6">
+                <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden mb-3">
                   <div
                     className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
                     style={{
@@ -209,35 +214,17 @@ export default function PaymentWidget() {
                   />
                 </div>
 
-                {/* Paid / Remaining */}
-                <div className="flex border-t border-gray-200">
-                  <div className="flex-1 py-4 text-center border-r border-gray-200">
-                    <p className="text-xs text-gray-500 mb-1">お支払済</p>
-                    <p className="text-xl font-medium text-gray-800">
-                      {paidAmount.toLocaleString()}
-                      <span className="text-sm ml-1">円</span>
-                    </p>
+                {/* Paid / Remaining - Compact */}
+                <div className="flex gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">支払済: </span>
+                    <span className="font-medium text-green-600">¥{paidAmount.toLocaleString()}</span>
                   </div>
-                  <div className="flex-1 py-4 text-center">
-                    <p className="text-xs text-gray-500 mb-1">ご利用残高</p>
-                    <p className="text-xl font-medium text-gray-800">
-                      {remainingAmount.toLocaleString()}
-                      <span className="text-sm ml-1">円</span>
-                    </p>
+                  <div>
+                    <span className="text-gray-500">残高: </span>
+                    <span className="font-medium text-gray-800">¥{remainingAmount.toLocaleString()}</span>
                   </div>
                 </div>
-
-                {/* Remaining Payments Count */}
-                <div className="text-center mt-4">
-                  <p className="text-sm text-gray-600">
-                    残支払回数：<span className="font-medium">{remainingCount}回</span> / {totalPayments}回
-                  </p>
-                </div>
-
-                {/* Disclaimer */}
-                <p className="text-xs text-gray-400 text-center mt-4">
-                  ※実際のお支払金額と異なる場合がございます。
-                </p>
               </div>
 
               {/* Schedule Table */}

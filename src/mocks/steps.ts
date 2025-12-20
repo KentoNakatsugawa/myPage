@@ -114,11 +114,20 @@ export const stations = [
 ];
 
 // Phase info for RoadPath
-export const phaseInfo = [
-  { name: '申込フェーズ', desc: '前受金のお支払い' },
-  { name: '契約フェーズ', desc: '電子契約・口座登録' },
-  { name: '書類フェーズ', desc: '必要書類の提出' },
-  { name: '準備フェーズ', desc: '車両の準備中' },
-  { name: '納車フェーズ', desc: '納車日の確定' },
-  { name: '利用中', desc: 'カーライフをお楽しみください' },
-];
+export interface PhaseInfo {
+  name: string;
+  desc: string;
+  bgColor: string;
+  textColor: string;
+}
+
+export const phaseInfo: Record<number, PhaseInfo> = {
+  1: { name: '申込フェーズ', desc: '前受金のお支払い', bgColor: 'bg-blue-100', textColor: 'text-blue-700' },
+  2: { name: '申込フェーズ', desc: '前受金のお支払い', bgColor: 'bg-blue-100', textColor: 'text-blue-700' },
+  3: { name: '契約フェーズ', desc: '電子契約・口座登録', bgColor: 'bg-purple-100', textColor: 'text-purple-700' },
+  4: { name: '契約フェーズ', desc: '電子契約・口座登録', bgColor: 'bg-purple-100', textColor: 'text-purple-700' },
+  5: { name: '書類フェーズ', desc: '必要書類の提出', bgColor: 'bg-amber-100', textColor: 'text-amber-700' },
+  6: { name: '準備フェーズ', desc: '車両の準備中', bgColor: 'bg-cyan-100', textColor: 'text-cyan-700' },
+  7: { name: '納車フェーズ', desc: '納車日の確定', bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
+  8: { name: '利用中', desc: 'カーライフをお楽しみください', bgColor: 'bg-norel-green-light', textColor: 'text-norel-green' },
+};

@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import NextImage from 'next/image';
-import { ChevronLeft, Phone, Menu, Send, Image as ImageIcon, Mic, Plus } from 'lucide-react';
+import { ChevronLeft, Phone, Menu, Send, Image, Mic, Plus } from 'lucide-react';
 
 interface LineMockUIProps {
   onLaunchMiniApp: () => void;
@@ -88,15 +87,11 @@ export default function LineMockUI({ onLaunchMiniApp }: LineMockUIProps) {
                   onClick={onLaunchMiniApp}
                   className="bg-white rounded-2xl overflow-hidden shadow-md cursor-pointer"
                 >
-                  {message.cardData?.image ? (
-                    <NextImage
-                      src={message.cardData.image}
-                      alt=""
-                      className="w-full h-32 object-cover"
-                      width={400}
-                      height={200}
-                    />
-                  ) : null}
+                  <img
+                    src={message.cardData?.image}
+                    alt=""
+                    className="w-full h-32 object-cover"
+                  />
                   <div className="p-3">
                     <p className="font-bold text-gray-800 text-sm">{message.cardData?.title}</p>
                     <p className="text-gray-500 text-xs mt-1">{message.cardData?.subtitle}</p>
@@ -214,11 +209,11 @@ export default function LineMockUI({ onLaunchMiniApp }: LineMockUIProps) {
 
       {/* Input Area */}
       <div className="bg-[#F7F7F7] px-3 py-2 flex items-center gap-2">
-        <button className="p-2" aria-label="添付">
-          <Plus className="w-6 h-6 text-gray-500" aria-hidden="true" />
+        <button className="p-2">
+          <Plus className="w-6 h-6 text-gray-500" />
         </button>
-        <button className="p-2" aria-label="画像">
-          <ImageIcon className="w-6 h-6 text-gray-500" aria-hidden="true" />
+        <button className="p-2">
+          <Image className="w-6 h-6 text-gray-500" />
         </button>
         <div className="flex-1 bg-white rounded-full px-4 py-2 flex items-center">
           <input
@@ -228,8 +223,8 @@ export default function LineMockUI({ onLaunchMiniApp }: LineMockUIProps) {
             disabled
           />
         </div>
-        <button className="p-2" aria-label="音声入力">
-          <Mic className="w-6 h-6 text-gray-500" aria-hidden="true" />
+        <button className="p-2">
+          <Mic className="w-6 h-6 text-gray-500" />
         </button>
         {!showRichMenu && (
           <button

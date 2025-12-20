@@ -12,10 +12,11 @@ export {
   stations,
   phaseInfo,
   type AlertInfo,
+  type PhaseInfo,
 } from './steps';
 
 // Billing mock data
 export { receipts, invoices, type BillingItem } from './billing';
 
 // FAQ mock data
-export { faqData, aiMockResponses, type FaqItem } from './faq';
+export { faqData, aiMockResponses, type FaqItem, type AiMockResponse } from './faq';
