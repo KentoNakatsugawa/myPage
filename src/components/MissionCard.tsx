@@ -12,6 +12,7 @@ import {
   Car,
   AlertTriangle,
   Star,
+  Check,
 } from 'lucide-react';
 import { useNorel } from '@/contexts/NorelContext';
 import { stepData, alertData } from '@/mocks';
@@ -35,6 +36,7 @@ function getStepIcon(step: number) {
 export default function MissionCard() {
   const { currentStep, alertType, nextStep, clearAlert, vehicleInfo } = useNorel();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { triggerConfetti } = useConfetti();
 
   const handleAction = () => {
@@ -49,59 +51,64 @@ export default function MissionCard() {
       return;
     }
 
+    // Show completion animation
+    setIsCompleting(true);
+
     // Trigger confetti for Step 3 and Step 7
     if (currentStep === 3 || currentStep === 7) {
       triggerConfetti();
     }
 
-    nextStep();
+    // Delay step transition for visual feedback
+    setTimeout(() => {
+      setIsCompleting(false);
+      nextStep();
+    }, 600);
   };
-
-  // Show alert card if there's an alert
-  if (alertType && alertData[alertType]) {
-    const alert = alertData[alertType];
-    return (
-      <motion.div
-        key="alert"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ x: -100, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="mx-4 my-4"
-      >
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-6 h-6 text-red-500" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-red-700 mb-2">
-                {alert.title}
-              </h3>
-              <p className="text-sm text-red-600 whitespace-pre-line mb-4">
-                {alert.description}
-              </p>
-              <motion.button
-                onClick={handleAction}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-red-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-red-600 transition-colors"
-              >
-                {alert.buttonLabel}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
 
   const step = stepData[currentStep - 1];
   const Icon = getStepIcon(currentStep);
+
+  // Non-destructive alert UI - shows alert above the task card
+  const alertSection = alertType && alertData[alertType] ? (
+    <motion.div
+      key="alert"
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -20, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="mx-4 mb-3"
+    >
+      <div className="bg-gradient-to-br from-status-error-light to-status-warning-light border-l-4 border-status-error rounded-xl p-4 shadow-card">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 bg-status-error-light rounded-full flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-status-error" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-bold text-status-error mb-1">
+              {alertData[alertType].title}
+            </h4>
+            <p className="text-xs text-gray-600 whitespace-pre-line mb-3">
+              {alertData[alertType].description}
+            </p>
+            <motion.button
+              onClick={() => clearAlert()}
+              whileTap={{ scale: 0.95 }}
+              className="bg-status-error text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm hover:bg-red-600 transition-colors"
+            >
+              {alertData[alertType].buttonLabel}
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
 
   // Special rendering for Step 8 (AI Trade-in)
   if (currentStep === 8) {
     return (
       <>
+        <AnimatePresence>{alertSection}</AnimatePresence>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -111,7 +118,7 @@ export default function MissionCard() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="mx-4 my-4"
           >
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl p-5 shadow-lg">
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl p-5 shadow-card">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
                   <Car className="w-5 h-5 text-white" />
@@ -127,7 +134,7 @@ export default function MissionCard() {
               </p>
 
               {/* Vehicle Value */}
-              <div className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+              <div className="bg-surface-primary rounded-xl p-4 mb-4 shadow-sm">
                 <p className="text-xs text-gray-500 mb-1">現在の推定評価額</p>
                 <p className="text-2xl font-bold text-purple-600">
                   ¥{vehicleInfo.estimatedValue.toLocaleString()}
@@ -146,7 +153,7 @@ export default function MissionCard() {
               <motion.button
                 onClick={handleAction}
                 whileTap={{ scale: 0.95 }}
-                className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:from-purple-600 hover:to-indigo-600 transition-all"
+                className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:from-purple-600 hover:to-indigo-600 transition-all"
               >
                 {step.buttonLabel}
               </motion.button>
@@ -162,43 +169,78 @@ export default function MissionCard() {
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={currentStep}
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ x: -100, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="mx-4 my-4"
-      >
-        <div className="bg-white border-2 border-norel-green rounded-2xl p-5 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-norel-green-light rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon className="w-6 h-6 text-norel-green" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold text-norel-green bg-norel-green-light px-2 py-0.5 rounded-full">
-                  STEP {currentStep}
-                </span>
+    <>
+      <AnimatePresence>{alertSection}</AnimatePresence>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentStep}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{
+            y: 0,
+            opacity: isCompleting ? 0.6 : 1,
+            scale: isCompleting ? 0.98 : 1,
+          }}
+          exit={{ x: -100, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="mx-4 my-4"
+        >
+          <div className={`bg-surface-primary border-2 border-norel-green rounded-2xl p-5 shadow-card transition-all duration-300 ${
+            isCompleting ? 'bg-norel-green-light' : ''
+          }`}>
+            <div className="flex items-start gap-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                isCompleting
+                  ? 'bg-norel-green scale-110'
+                  : 'bg-norel-green-light'
+              }`}>
+                {isCompleting ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  >
+                    <Check className="w-6 h-6 text-white" />
+                  </motion.div>
+                ) : (
+                  <Icon className="w-6 h-6 text-norel-green" />
+                )}
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">
-                {step.title}
-              </h3>
-              <p className="text-sm text-gray-600 whitespace-pre-line mb-4">
-                {step.description}
-              </p>
-              <motion.button
-                onClick={handleAction}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-norel-green text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-norel-green-dark transition-colors"
-              >
-                {step.buttonLabel}
-              </motion.button>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-norel-green bg-norel-green-light px-2.5 py-1 rounded-full">
+                    STEP {currentStep}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-gray-600 whitespace-pre-line mb-4 leading-relaxed">
+                  {step.description}
+                </p>
+                <motion.button
+                  onClick={handleAction}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isCompleting}
+                  className={`w-full font-bold py-3.5 px-6 rounded-xl shadow-norel transition-all ${
+                    isCompleting
+                      ? 'bg-norel-green-dark text-white cursor-not-allowed'
+                      : 'bg-norel-green text-white hover:bg-norel-green-dark'
+                  }`}
+                >
+                  {isCompleting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Check className="w-5 h-5" />
+                      完了しました
+                    </span>
+                  ) : (
+                    step.buttonLabel
+                  )}
+                </motion.button>
+              </div>
             </div>
           </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
+    </>
   );
 }

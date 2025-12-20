@@ -63,48 +63,60 @@ export default function MenuDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-50 overflow-y-auto"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-surface-primary z-50 overflow-y-auto"
           >
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between z-10">
+            {/* Header - Improved close button tap target (48x48px) */}
+            <div className="sticky top-0 bg-surface-primary border-b border-border px-4 py-3 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-gray-900">設定・契約情報</h2>
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={closeMenu}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-3 hover:bg-surface-secondary rounded-full transition-colors"
+                aria-label="メニューを閉じる"
               >
                 <X className="w-6 h-6 text-gray-600" />
               </motion.button>
             </div>
 
-            {/* Vehicle Hero Image */}
+            {/* Vehicle Hero Image with improved overlay for text readability */}
             <div className="relative">
-              <div className="aspect-[16/9] overflow-hidden">
-                  <Image
-                    src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80"
-                    alt="Toyota Camry"
-                    className="w-full h-full object-cover"
-                    width={800}
-                    height={450}
-                  />
+              <div className="aspect-[16/9] overflow-hidden relative">
+                <Image
+                  src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80"
+                  alt="BMW 320d Mスポーツ - ご契約中の車両"
+                  className="object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 448px"
+                  priority
+                />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                <p className="text-white/80 text-xs">ご契約中の車両</p>
-                <p className="text-white text-lg font-bold">BMW 320d Mスポーツ</p>
-                <p className="text-white/70 text-xs mt-1">2018年式 / アルピンホワイト</p>
+              {/* Gradient overlay for text readability (contrast ratio 4.5:1+) */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5">
+                <p className="text-white/90 text-xs font-medium tracking-wide">ご契約中の車両</p>
+                <p className="text-white text-xl font-bold mt-1 drop-shadow-sm">BMW 320d Mスポーツ</p>
+                <p className="text-white/80 text-sm mt-1">2018年式 / アルピンホワイト</p>
               </div>
             </div>
 
-            <div className="p-4 space-y-6">
-              <DocumentsSection onOpenContract={() => setIsContractViewerOpen(true)} />
-              <ProfileSection userProfile={userProfile} onOpenModal={openProfileModal} />
-              <CertificatesSection userProfile={userProfile} onOpenModal={openCertificateModal} />
-              <LogoutSection
-                onLogout={() => {
-                  logout();
-                  closeMenu();
-                }}
-              />
+            {/* Sections with divide-y for visual grouping */}
+            <div className="divide-y divide-border-light">
+              <div className="p-4">
+                <DocumentsSection onOpenContract={() => setIsContractViewerOpen(true)} />
+              </div>
+              <div className="p-4">
+                <ProfileSection userProfile={userProfile} onOpenModal={openProfileModal} />
+              </div>
+              <div className="p-4">
+                <CertificatesSection userProfile={userProfile} onOpenModal={openCertificateModal} />
+              </div>
+              <div className="p-4">
+                <LogoutSection
+                  onLogout={() => {
+                    logout();
+                    closeMenu();
+                  }}
+                />
+              </div>
             </div>
 
             {/* Modals */}

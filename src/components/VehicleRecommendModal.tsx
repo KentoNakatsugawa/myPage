@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Fuel, Gauge, Calendar, Star, TrendingUp, Leaf, Shield, ChevronRight } from 'lucide-react';
+import { X, Fuel, Gauge, Calendar, Star, TrendingUp, Leaf, Shield, ChevronRight, Zap, Users, Cog } from 'lucide-react';
 
 interface VehicleRecommendModalProps {
   isOpen: boolean;
@@ -98,7 +98,7 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="w-full max-w-lg bg-surface-primary rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-modal"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-4 flex items-center justify-between shrink-0">
@@ -109,7 +109,8 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                className="p-3 hover:bg-white/20 rounded-full transition-colors"
+                aria-label="閉じる"
               >
                 <X className="w-6 h-6 text-white" />
               </motion.button>
@@ -118,11 +119,11 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
               {/* Current Vehicle Value */}
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b">
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-border">
                 <p className="text-xs text-gray-600 mb-1">現在のお車の推定評価額</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-purple-600">¥1,450,000</span>
-                  <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                  <span className="text-sm text-status-success font-medium flex items-center gap-1">
                     <TrendingUp className="w-4 h-4" />
                     市場価格上昇中
                   </span>
@@ -131,14 +132,14 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
               </div>
 
               {/* AI Recommendation Banner */}
-              <div className="p-4 bg-amber-50 border-b border-amber-100">
+              <div className="p-4 bg-status-warning-light border-b border-amber-100">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
                     <span className="text-xl">🤖</span>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-amber-800">AIからのアドバイス</p>
-                    <p className="text-xs text-amber-700 mt-1">
+                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">
                       過去6ヶ月の走行データを分析した結果、月間走行距離は約800km、
                       主に通勤利用が中心です。燃費効率の良いハイブリッド車への乗り換えで、
                       <span className="font-bold">年間約6万円の燃料費削減</span>が見込めます。
@@ -148,7 +149,7 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
               </div>
 
               {/* Vehicle Selector */}
-              <div className="p-4 border-b">
+              <div className="p-4 border-b border-border">
                 <p className="text-sm font-bold text-gray-700 mb-3">おすすめ車両 TOP3</p>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {recommendedVehicles.map((vehicle) => (
@@ -158,11 +159,11 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                       onClick={() => setSelectedVehicle(vehicle)}
                       className={`shrink-0 p-2 rounded-xl border-2 transition-all ${
                         selectedVehicle.id === vehicle.id
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 bg-white'
+                          ? 'border-purple-500 bg-purple-50 shadow-sm'
+                          : 'border-border bg-surface-primary hover:border-purple-200'
                       }`}
                     >
-                      <div className="w-20 h-14 bg-gray-100 rounded-lg overflow-hidden mb-1 relative">
+                      <div className="w-20 h-14 bg-surface-tertiary rounded-lg overflow-hidden mb-1 relative">
                         <Image
                           src={vehicle.image}
                           alt={vehicle.name}
@@ -185,7 +186,7 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
               <div className="p-4">
                 {/* Match Score */}
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
                     マッチ度 {selectedVehicle.matchScore}%
                   </div>
                   <div className="flex">
@@ -203,13 +204,14 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                 </div>
 
                 {/* Vehicle Image & Info */}
-                <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 relative h-48">
+                <div className="bg-surface-tertiary rounded-xl overflow-hidden mb-4 relative h-48 shadow-card">
                   <Image
                     src={selectedVehicle.image}
                     alt={selectedVehicle.name}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 500px"
+                    priority
                   />
                 </div>
 
@@ -229,7 +231,7 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                 </div>
 
                 {/* AI Recommendation Message */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-4">
+                <div className="bg-gradient-to-r from-status-success-light to-emerald-50 border border-status-success/30 rounded-xl p-4 mb-4 shadow-sm">
                   <p className="text-sm font-medium text-green-800 flex items-center gap-2">
                     <span className="text-lg">💡</span>
                     {selectedVehicle.recommendation}
@@ -246,7 +248,7 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex items-center gap-3 bg-gray-50 rounded-lg p-3"
+                        className="flex items-center gap-3 bg-surface-secondary rounded-lg p-3"
                       >
                         <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
                           <highlight.icon className="w-4 h-4 text-purple-600" />
@@ -257,36 +259,57 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                   </div>
                 </div>
 
-                {/* Specs */}
+                {/* Specs - Grid with icons */}
                 <div className="mb-4">
                   <p className="text-sm font-bold text-gray-700 mb-2">スペック</p>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500">エンジン</p>
-                      <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.engine}</p>
+                    <div className="bg-surface-secondary rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        <Cog className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">エンジン</p>
+                        <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.engine}</p>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500">最高出力</p>
-                      <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.power}</p>
+                    <div className="bg-surface-secondary rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">最高出力</p>
+                        <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.power}</p>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500">燃費</p>
-                      <p className="text-sm font-medium text-gray-800">{selectedVehicle.fuelEfficiency}</p>
+                    <div className="bg-surface-secondary rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        <Fuel className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">燃費</p>
+                        <p className="text-sm font-medium text-gray-800">{selectedVehicle.fuelEfficiency}</p>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-xs text-gray-500">乗車定員</p>
-                      <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.seats}</p>
+                    <div className="bg-surface-secondary rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                        <Users className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">乗車定員</p>
+                        <p className="text-sm font-medium text-gray-800">{selectedVehicle.specs.seats}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer CTA */}
-            <div className="p-4 bg-white border-t shrink-0">
+            {/* Footer CTA - Enhanced with shadow and affordance */}
+            <div className="p-4 bg-surface-primary border-t border-border shrink-0">
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg"
+                whileHover={{ scale: 1.01 }}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all"
               >
                 この車両で乗り換えを相談する
                 <ChevronRight className="w-5 h-5" />

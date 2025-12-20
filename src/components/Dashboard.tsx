@@ -29,10 +29,11 @@ export default function Dashboard() {
   const scoreLevel = getScoreLevel(norelScore);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-secondary">
       <Header />
 
-      <main className="pb-32">
+      {/* Main Content with unified spacing */}
+      <main className="pb-32 space-y-6">
         {isDeliveryComplete ? (
           <>
             {/* After Delivery: Payment first, then Mission, then Path */}
@@ -60,26 +61,27 @@ export default function Dashboard() {
         {/* Collapsed Bar */}
         <motion.button
           onClick={() => setIsScoreExpanded(true)}
-          className="w-full bg-white border-t border-gray-200 shadow-lg px-4 py-3 flex items-center justify-between"
+          className="w-full bg-surface-primary border-t border-border shadow-modal px-4 py-4 flex items-center justify-between"
           whileTap={{ scale: 0.98 }}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${scoreLevel.color} flex items-center justify-center`}>
-              <Award className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${scoreLevel.color} flex items-center justify-center shadow-sm`}>
+              <Award className="w-6 h-6 text-white" />
             </div>
             <div className="text-left">
-              <p className="text-xs text-gray-500">NOREL SCORE</p>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-gray-800">{norelScore}</span>
-                <span className="text-xs text-gray-400">pt</span>
-                <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-full bg-gradient-to-r ${scoreLevel.color}`}>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">NOREL SCORE</p>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                {/* Improved visual hierarchy - larger score with font-black */}
+                <span className="text-4xl font-black text-gray-900">{norelScore}</span>
+                <span className="text-sm text-gray-400 font-medium">点</span>
+                <span className={`text-xs font-bold text-white px-2.5 py-1 rounded-full bg-gradient-to-r ${scoreLevel.color} shadow-sm`}>
                   {scoreLevel.label}
                 </span>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
-            <span className="text-xs">詳細を見る</span>
+            <span className="text-xs font-medium">詳細を見る</span>
             <ChevronUp className="w-5 h-5" />
           </div>
         </motion.button>
@@ -101,13 +103,13 @@ export default function Dashboard() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg bg-gray-50 rounded-t-3xl max-h-[85vh] overflow-y-auto"
+              className="w-full max-w-lg bg-surface-secondary rounded-t-3xl max-h-[85vh] overflow-y-auto shadow-modal"
             >
               {/* Close Handle */}
               <div className="flex justify-center pt-3 pb-2">
                 <button
                   onClick={() => setIsScoreExpanded(false)}
-                  className="w-12 h-1.5 bg-gray-300 rounded-full"
+                  className="w-12 h-1.5 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors"
                 />
               </div>
 
@@ -118,7 +120,7 @@ export default function Dashboard() {
               <div className="p-4">
                 <button
                   onClick={() => setIsScoreExpanded(false)}
-                  className="w-full py-3 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition-colors"
+                  className="w-full py-3.5 bg-surface-tertiary text-gray-700 font-semibold rounded-xl hover:bg-gray-300 transition-colors"
                 >
                   閉じる
                 </button>
