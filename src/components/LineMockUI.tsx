@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NextImage from 'next/image';
-import { ChevronLeft, Phone, Menu, Send, Image, Mic, Plus } from 'lucide-react';
+import { ChevronLeft, Phone, Menu, Send, Image as ImageIcon, Mic, Plus } from 'lucide-react';
 
 interface LineMockUIProps {
   onLaunchMiniApp: () => void;
@@ -218,7 +218,7 @@ export default function LineMockUI({ onLaunchMiniApp }: LineMockUIProps) {
           <Plus className="w-6 h-6 text-gray-500" aria-hidden="true" />
         </button>
         <button className="p-2" aria-label="画像">
-          <Image className="w-6 h-6 text-gray-500" aria-hidden="true" />
+          <ImageIcon className="w-6 h-6 text-gray-500" aria-hidden="true" />
         </button>
         <div className="flex-1 bg-white rounded-full px-4 py-2 flex items-center">
           <input

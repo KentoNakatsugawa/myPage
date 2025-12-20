@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Fuel, Gauge, Calendar, Star, TrendingUp, Leaf, Shield, ChevronRight } from 'lucide-react';
 
@@ -161,11 +162,13 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                           : 'border-gray-200 bg-white'
                       }`}
                     >
-                      <div className="w-20 h-14 bg-gray-100 rounded-lg overflow-hidden mb-1">
-                        <img
+                      <div className="w-20 h-14 bg-gray-100 rounded-lg overflow-hidden mb-1 relative">
+                        <Image
                           src={vehicle.image}
                           alt={vehicle.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="80px"
                         />
                       </div>
                       <p className="text-xs font-medium text-gray-800 truncate w-20">{vehicle.name}</p>
@@ -200,11 +203,13 @@ export default function VehicleRecommendModal({ isOpen, onClose }: VehicleRecomm
                 </div>
 
                 {/* Vehicle Image & Info */}
-                <div className="bg-gray-100 rounded-xl overflow-hidden mb-4">
-                  <img
+                <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 relative h-48">
+                  <Image
                     src={selectedVehicle.image}
                     alt={selectedVehicle.name}
-                    className="w-full h-48 object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 500px"
                   />
                 </div>
 
