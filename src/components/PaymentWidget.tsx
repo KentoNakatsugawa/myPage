@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, ChevronRight, X, Check, Clock } from 'lucide-react';
+import { CreditCard, ChevronRight, X, Check, Clock, Wallet } from 'lucide-react';
 import { useNorel } from '@/contexts/NorelContext';
 
 // Calculate the payment start date (5th of the month after next from registration)
@@ -16,25 +16,47 @@ function calculatePaymentStartDate(registrationDate: Date): { month: string; dat
   return { month, date };
 }
 
-// Generate payment schedule starting from the calculated start date
-function generatePaymentSchedule(monthlyAmount: number, totalPayments: number, startDate: Date) {
-  const schedule = [];
+interface PaymentItem {
+  id: number;
+  year?: number;
+  month?: number;
+  amount: number;
+  isPaid: boolean;
+  paymentDay?: number;
+  isPrepayment: boolean; // 前受金充当かどうか
+}
 
-  for (let i = 0; i < totalPayments; i++) {
-    const paymentDate = new Date(startDate);
+// Generate payment schedule including prepayment entries
+function generatePaymentSchedule(monthlyAmount: number, totalPayments: number, withdrawalStartDate: Date): PaymentItem[] {
+  const schedule: PaymentItem[] = [];
+
+  // 1回目と2回目は前受金充当（支払日なし）
+  for (let i = 0; i < 2; i++) {
+    schedule.push({
+      id: i + 1,
+      amount: monthlyAmount,
+      isPaid: true, // 前受金は支払済み扱い
+      isPrepayment: true,
+    });
+  }
+
+  // 3回目以降は口座引き落とし
+  for (let i = 0; i < totalPayments - 2; i++) {
+    const paymentDate = new Date(withdrawalStartDate);
     paymentDate.setMonth(paymentDate.getMonth() + i);
 
     const year = paymentDate.getFullYear();
     const month = paymentDate.getMonth() + 1;
-    const isPaid = paymentDate < new Date(); // Mark as paid if date is in the past
+    const isPaid = paymentDate < new Date();
 
     schedule.push({
-      id: i + 1,
+      id: i + 3, // 3回目から開始
       year,
       month,
       amount: monthlyAmount,
       isPaid,
-      paymentDay: 5, // 5th of each month
+      paymentDay: 5,
+      isPrepayment: false,
     });
   }
 
@@ -45,26 +67,22 @@ export default function PaymentWidget() {
   const { paymentInfo, userProfile, currentStep } = useNorel();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
-  // Vehicle registration is considered complete at step 6 or later
-  // (Step 6 is vehicle preparation which includes name change)
+  // Vehicle registration is considered complete at step 7 or later
   const isVehicleRegistered = currentStep >= 7;
 
   // Mock registration date (in real app, this would come from context/API)
   const registrationDate = new Date(2025, 0, 15); // January 15, 2025
   const paymentStartInfo = calculatePaymentStartDate(registrationDate);
 
-  // Contract payments: 82 months total, minus 2 (翌々月から開始)
+  // Contract payments: 82 months total
   const contractMonths = 82;
-  const actualPayments = contractMonths - 2; // 80 payments
 
-  // Calculate start date for schedule
-  const scheduleStartDate = new Date(registrationDate);
-  scheduleStartDate.setMonth(scheduleStartDate.getMonth() + 2);
-  scheduleStartDate.setDate(5);
+  // Calculate start date for bank withdrawal (3回目から = 翌々月5日)
+  const withdrawalStartDate = new Date(registrationDate);
+  withdrawalStartDate.setMonth(withdrawalStartDate.getMonth() + 2);
+  withdrawalStartDate.setDate(5);
 
-  const paymentSchedule = isVehicleRegistered
-    ? generatePaymentSchedule(paymentInfo.amount, actualPayments, scheduleStartDate)
-    : [];
+  const paymentSchedule = generatePaymentSchedule(paymentInfo.amount, contractMonths, withdrawalStartDate);
 
   const totalPayments = paymentSchedule.length;
   const paidCount = paymentSchedule.filter(p => p.isPaid).length;
@@ -76,6 +94,9 @@ export default function PaymentWidget() {
   const remainingAmount = paymentInfo.amount * remainingCount;
   const progressPercentage = totalPayments > 0 ? (paidCount / totalPayments) * 100 : 0;
 
+  // 前受金の合計
+  const prepaymentAmount = paymentInfo.amount * 2;
+
   return (
     <>
       <motion.div
@@ -86,23 +107,15 @@ export default function PaymentWidget() {
       >
         <motion.button
           whileTap={{ scale: 0.98 }}
-          onClick={() => isVehicleRegistered && setIsScheduleOpen(true)}
-          className={`w-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between transition-colors ${
-            isVehicleRegistered ? 'hover:bg-gray-50 cursor-pointer' : 'cursor-default'
-          }`}
+          onClick={() => setIsScheduleOpen(true)}
+          className="w-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between hover:bg-gray-50 cursor-pointer transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              isVehicleRegistered ? 'bg-blue-100' : 'bg-gray-100'
-            }`}>
-              {isVehicleRegistered ? (
-                <CreditCard className="w-5 h-5 text-blue-600" />
-              ) : (
-                <Clock className="w-5 h-5 text-gray-400" />
-              )}
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100">
+              <CreditCard className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-left">
-              <p className="text-xs text-gray-500">次回のお支払い</p>
+              <p className="text-xs text-gray-500">次回のお支払い（3回目〜）</p>
               {isVehicleRegistered ? (
                 <>
                   <p className="text-lg font-bold text-gray-900">
@@ -113,22 +126,20 @@ export default function PaymentWidget() {
               ) : (
                 <>
                   <p className="text-sm font-medium text-gray-700 leading-snug">
-                    車両登録が完了した翌々月から<br />お支払いが開始となります
+                    車両名義変更の翌々月5日から<br />口座引き落とし開始
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">月額 ¥{paymentInfo.amount.toLocaleString()}</p>
+                  <p className="text-xs text-gray-400 mt-1">※1・2回目は前受金充当</p>
                 </>
               )}
             </div>
           </div>
-          {isVehicleRegistered && (
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          )}
+          <ChevronRight className="w-5 h-5 text-gray-400" />
         </motion.button>
       </motion.div>
 
       {/* Payment Schedule Modal */}
       <AnimatePresence>
-        {isScheduleOpen && isVehicleRegistered && (
+        {isScheduleOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -160,11 +171,27 @@ export default function PaymentWidget() {
                 </button>
               </div>
 
-              {/* Summary - Reference Image Style */}
+              {/* Prepayment Notice */}
+              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Wallet className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">前受金について</p>
+                    <p className="text-xs text-amber-700 mt-0.5">
+                      1回目・2回目のお支払いは前受金（¥{prepaymentAmount.toLocaleString()}）から充当されます。<br />
+                      <span className="font-bold">口座引き落としは3回目から開始</span>となります。
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary */}
               <div className="p-6 bg-white border-b border-gray-100">
                 {/* Total Amount */}
                 <div className="text-center mb-6">
-                  <p className="text-sm text-gray-500 mb-2">お支払総額</p>
+                  <p className="text-sm text-gray-500 mb-2">お支払総額（全{totalPayments}回）</p>
                   <p className="text-4xl font-light text-gray-800">
                     {totalAmount.toLocaleString()}
                     <span className="text-xl ml-1">円</span>
@@ -225,22 +252,46 @@ export default function PaymentWidget() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {paymentSchedule.map((payment) => (
+                    {paymentSchedule.map((payment, index) => (
                       <tr
                         key={payment.id}
-                        className={payment.isPaid ? 'bg-green-50/50' : 'bg-white'}
+                        className={
+                          payment.isPrepayment
+                            ? 'bg-amber-50/50'
+                            : payment.isPaid
+                              ? 'bg-green-50/50'
+                              : index === 2
+                                ? 'bg-blue-50/50' // 3回目を強調
+                                : 'bg-white'
+                        }
                       >
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {payment.id}回目
+                          <div className="flex items-center gap-2">
+                            {payment.id}回目
+                            {index === 2 && (
+                              <span className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">
+                                引落開始
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
-                          {payment.year}年{payment.month}月{payment.paymentDay}日
+                          {payment.isPrepayment ? (
+                            <span className="text-amber-600">—</span>
+                          ) : (
+                            `${payment.year}年${payment.month}月${payment.paymentDay}日`
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
                           ¥{payment.amount.toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {payment.isPaid ? (
+                          {payment.isPrepayment ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                              <Wallet className="w-3 h-3" />
+                              前受金
+                            </span>
+                          ) : payment.isPaid ? (
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
                               <Check className="w-3 h-3" />
                               済
@@ -260,7 +311,7 @@ export default function PaymentWidget() {
               {/* Footer */}
               <div className="p-4 border-t border-gray-100 bg-gray-50">
                 <p className="text-xs text-gray-500 text-center mb-3">
-                  毎月5日に登録口座より自動引き落としされます
+                  3回目以降、毎月5日に登録口座より自動引き落としされます
                 </p>
                 <button
                   onClick={() => setIsScheduleOpen(false)}
