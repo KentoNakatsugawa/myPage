@@ -2,13 +2,23 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, ChevronRight, X, Check } from 'lucide-react';
+import { CreditCard, ChevronRight, X, Check, Clock } from 'lucide-react';
 import { useNorel } from '@/contexts/NorelContext';
 
-// Generate 82 months of payment schedule starting from contract date
-function generatePaymentSchedule(monthlyAmount: number, startDate: Date = new Date(2024, 11, 1)) {
+// Calculate the payment start date (5th of the month after next from registration)
+function calculatePaymentStartDate(registrationDate: Date): { month: string; date: string } {
+  const startDate = new Date(registrationDate);
+  startDate.setMonth(startDate.getMonth() + 2); // 翌々月
+  startDate.setDate(5); // 5日
+
+  const month = `${startDate.getMonth() + 1}月`;
+  const date = `${startDate.getFullYear()}年${startDate.getMonth() + 1}月5日`;
+  return { month, date };
+}
+
+// Generate payment schedule starting from the calculated start date
+function generatePaymentSchedule(monthlyAmount: number, totalPayments: number, startDate: Date) {
   const schedule = [];
-  const totalPayments = 82;
 
   for (let i = 0; i < totalPayments; i++) {
     const paymentDate = new Date(startDate);
@@ -32,10 +42,30 @@ function generatePaymentSchedule(monthlyAmount: number, startDate: Date = new Da
 }
 
 export default function PaymentWidget() {
-  const { paymentInfo, userProfile } = useNorel();
+  const { paymentInfo, userProfile, currentStep } = useNorel();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
-  const paymentSchedule = generatePaymentSchedule(paymentInfo.amount);
+  // Vehicle registration is considered complete at step 6 or later
+  // (Step 6 is vehicle preparation which includes name change)
+  const isVehicleRegistered = currentStep >= 7;
+
+  // Mock registration date (in real app, this would come from context/API)
+  const registrationDate = new Date(2025, 0, 15); // January 15, 2025
+  const paymentStartInfo = calculatePaymentStartDate(registrationDate);
+
+  // Contract payments: 82 months total, minus 2 (翌々月から開始)
+  const contractMonths = 82;
+  const actualPayments = contractMonths - 2; // 80 payments
+
+  // Calculate start date for schedule
+  const scheduleStartDate = new Date(registrationDate);
+  scheduleStartDate.setMonth(scheduleStartDate.getMonth() + 2);
+  scheduleStartDate.setDate(5);
+
+  const paymentSchedule = isVehicleRegistered
+    ? generatePaymentSchedule(paymentInfo.amount, actualPayments, scheduleStartDate)
+    : [];
+
   const totalPayments = paymentSchedule.length;
   const paidCount = paymentSchedule.filter(p => p.isPaid).length;
   const remainingCount = totalPayments - paidCount;
@@ -44,7 +74,7 @@ export default function PaymentWidget() {
   const totalAmount = paymentInfo.amount * totalPayments;
   const paidAmount = paymentInfo.amount * paidCount;
   const remainingAmount = paymentInfo.amount * remainingCount;
-  const progressPercentage = (paidCount / totalPayments) * 100;
+  const progressPercentage = totalPayments > 0 ? (paidCount / totalPayments) * 100 : 0;
 
   return (
     <>
@@ -56,29 +86,49 @@ export default function PaymentWidget() {
       >
         <motion.button
           whileTap={{ scale: 0.98 }}
-          onClick={() => setIsScheduleOpen(true)}
-          className="w-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between hover:bg-gray-50 transition-colors"
+          onClick={() => isVehicleRegistered && setIsScheduleOpen(true)}
+          className={`w-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between transition-colors ${
+            isVehicleRegistered ? 'hover:bg-gray-50 cursor-pointer' : 'cursor-default'
+          }`}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-blue-600" />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              isVehicleRegistered ? 'bg-blue-100' : 'bg-gray-100'
+            }`}>
+              {isVehicleRegistered ? (
+                <CreditCard className="w-5 h-5 text-blue-600" />
+              ) : (
+                <Clock className="w-5 h-5 text-gray-400" />
+              )}
             </div>
             <div className="text-left">
               <p className="text-xs text-gray-500">次回のお支払い</p>
-              <p className="text-lg font-bold text-gray-900">
-                {paymentInfo.nextPaymentDate} / ¥
-                {paymentInfo.amount.toLocaleString()}
-              </p>
-              <p className="text-xs text-blue-600 mt-1">支払いスケジュールを見る →</p>
+              {isVehicleRegistered ? (
+                <>
+                  <p className="text-lg font-bold text-gray-900">
+                    {paymentStartInfo.month}5日 / ¥{paymentInfo.amount.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">支払いスケジュールを見る →</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-gray-700 leading-snug">
+                    車両登録が完了した翌々月から<br />お支払いが開始となります
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">月額 ¥{paymentInfo.amount.toLocaleString()}</p>
+                </>
+              )}
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          {isVehicleRegistered && (
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          )}
         </motion.button>
       </motion.div>
 
       {/* Payment Schedule Modal */}
       <AnimatePresence>
-        {isScheduleOpen && (
+        {isScheduleOpen && isVehicleRegistered && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
